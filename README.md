@@ -181,7 +181,7 @@ CodeLens-AI/
 └── README.md
 ```
 
-## ⚙️ Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -244,7 +244,7 @@ The objective of CodeLens AI is to make code reviews more accessible, structured
 ---
 
 ## 👨‍💻 Author
-**vrinda8331-prog**
+**vrinda8331-prog** & 
 **Ayush Gorlawar**
 
 Developer | Technology Enthusiast
