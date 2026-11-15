@@ -42,6 +42,8 @@
     elements.dropZone = document.getElementById('code-drop-zone');
     elements.fileInput = document.getElementById('code-file-input');
     elements.langSelect = document.getElementById('language-select');
+    elements.detectedLangBadge = document.getElementById('detected-lang-badge');
+    elements.detectedLangName = document.getElementById('detected-lang-name');
     elements.btnRunScan = document.getElementById('btn-run-scan');
     elements.btnSampleVulnerable = document.getElementById('btn-sample-vulnerable');
     elements.btnSampleBuggy = document.getElementById('btn-sample-buggy');
@@ -70,10 +72,22 @@
         elements.lineNumbers,
         elements.editorStats
       );
-      // Load default sample
-      editorManagerInstance.loadPreset('vulnerable_js');
-      currentFilename = 'sample-vulnerable.js';
+      // Start with a clean, blank workspace for new analysis
+      editorManagerInstance.setValue('');
+      currentFilename = 'untitled.js';
       if (elements.activeFileName) elements.activeFileName.textContent = currentFilename;
+      updateAutoDetectedLanguage('');
+
+      // Real-time language auto-detection as user types or pastes
+      elements.codeTextarea.addEventListener('input', () => {
+        updateAutoDetectedLanguage(elements.codeTextarea.value);
+      });
+    }
+
+    if (elements.langSelect) {
+      elements.langSelect.addEventListener('change', () => {
+        updateAutoDetectedLanguage(elements.codeTextarea ? elements.codeTextarea.value : '');
+      });
     }
 
     if (window.FileManager && elements.dropZone && elements.fileInput) {
@@ -87,16 +101,49 @@
           currentFilename = fileData.name;
           if (elements.activeFileName) elements.activeFileName.textContent = fileData.name;
 
-          // Auto-detect language
-          if (window.LanguageDetector) {
-            const detected = window.LanguageDetector.detect(fileData.content, fileData.name);
-            if (elements.langSelect) {
-              elements.langSelect.value = detected.language;
-            }
-          }
+          // Auto-detect language from file upload
+          updateAutoDetectedLanguage(fileData.content);
           switchTab('analyzer');
         }
       );
+    }
+  }
+
+  function updateAutoDetectedLanguage(code) {
+    if (!window.LanguageDetector) return;
+    const currentSetting = elements.langSelect ? elements.langSelect.value : 'auto';
+
+    if (currentSetting === 'auto') {
+      if (!code || !code.trim()) {
+        if (elements.detectedLangName) elements.detectedLangName.textContent = 'Auto (Plain Text)';
+        return;
+      }
+      const detected = window.LanguageDetector.detect(code, currentFilename);
+      const confPct = Math.round((detected.confidence || 0.8) * 100);
+      if (elements.detectedLangName) {
+        elements.detectedLangName.textContent = `${detected.language} (${confPct}%)`;
+      }
+    } else {
+      if (elements.detectedLangName) {
+        elements.detectedLangName.textContent = `Manual: ${currentSetting}`;
+      }
+    }
+  }
+
+  function startNewAnalysis() {
+    currentReview = null;
+    currentFilename = 'untitled.js';
+    if (elements.activeFileName) elements.activeFileName.textContent = currentFilename;
+    if (editorManagerInstance) {
+      editorManagerInstance.setValue('');
+    }
+    if (elements.langSelect) {
+      elements.langSelect.value = 'auto';
+    }
+    updateAutoDetectedLanguage('');
+    switchTab('analyzer');
+    if (elements.codeTextarea) {
+      elements.codeTextarea.focus();
     }
   }
 
@@ -158,6 +205,7 @@
         if (editorManagerInstance) editorManagerInstance.clear();
         currentFilename = 'untitled.js';
         if (elements.activeFileName) elements.activeFileName.textContent = currentFilename;
+        updateAutoDetectedLanguage('');
       });
     }
 
@@ -223,12 +271,7 @@
       editorManagerInstance.loadPreset(presetKey);
       currentFilename = filename || `${presetKey}.js`;
       if (elements.activeFileName) elements.activeFileName.textContent = currentFilename;
-
-      if (window.LanguageDetector) {
-        const detected = window.LanguageDetector.detect(editorManagerInstance.getValue(), currentFilename);
-        if (elements.langSelect) elements.langSelect.value = detected.language;
-      }
-
+      updateAutoDetectedLanguage(editorManagerInstance.getValue());
       switchTab('analyzer');
     }
   }
@@ -240,7 +283,15 @@
       return;
     }
 
-    const selectedLang = elements.langSelect ? elements.langSelect.value : 'JavaScript';
+    let selectedLang = elements.langSelect ? elements.langSelect.value : 'auto';
+    if (selectedLang === 'auto') {
+      if (window.LanguageDetector) {
+        const detected = window.LanguageDetector.detect(code, currentFilename);
+        selectedLang = detected.language || 'JavaScript';
+      } else {
+        selectedLang = 'JavaScript';
+      }
+    }
 
     // 0. Security Layer Pre-Check & Sanitization
     let cleanCode = code;
@@ -351,8 +402,8 @@
 
         <div class="fix-recommendation-box">
           <div class="fix-header">
-            <span>✨ Recommended Fix:</span>
-            <button class="copy-fix-btn" data-fix="${encodeURIComponent(issue.remediation || issue.fix || '')}">Copy Fix</button>
+            <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#10b981" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg> Recommended Fix:</span>
+            <button class="copy-fix-btn" data-fix="${encodeURIComponent(issue.remediation || issue.fix || '')}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> Copy Fix</button>
           </div>
           <code>${escapeHtml(issue.remediation || issue.fix || '')}</code>
         </div>
@@ -367,7 +418,7 @@
             <span class="large-score-grade">${review.grade}</span>
           </div>
           <div class="results-summary-info">
-            <h2>Audit Complete: ${escapeHtml(review.filename || 'Source Code')}</h2>
+            <h2><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#38bdf8" stroke-width="2" style="vertical-align: -3px; margin-right: 6px;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> Audit Complete: ${escapeHtml(review.filename || 'Source Code')}</h2>
             <p class="text-muted text-sm">
               Language: <strong>${escapeHtml(review.language)}</strong> &bull; 
               Lines of Code: <strong>${review.linesOfCode}</strong> &bull; 
@@ -380,8 +431,8 @@
         </div>
 
         <div class="results-actions">
-          <button class="btn btn-outline btn-sm" id="res-btn-reedit">✏️ Edit Code</button>
-          <button class="btn btn-primary btn-sm" id="res-btn-export-html">📥 Download Report</button>
+          <button class="btn btn-outline btn-sm" id="res-btn-reedit"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg> Edit Code</button>
+          <button class="btn btn-primary btn-sm" id="res-btn-export-html"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download Report</button>
         </div>
       </div>
 
@@ -389,7 +440,7 @@
       <div class="metrics-breakdown-grid">
         <div class="metric-card">
           <div class="metric-title-row">
-            <span>🔒 Security (40 pts)</span>
+            <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#ef4444" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Security (40 pts)</span>
             <strong>${metrics.security ? metrics.security.score : 40} / 40</strong>
           </div>
           <div class="metric-progress-bg">
@@ -399,7 +450,7 @@
 
         <div class="metric-card">
           <div class="metric-title-row">
-            <span>🐛 Bug Detection (30 pts)</span>
+            <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#f97316" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><rect width="8" height="14" x="8" y="6" rx="4"></rect><path d="m19 7-3 2"></path><path d="m5 7 3 2"></path><path d="m19 19-3-2"></path><path d="m5 19 3-2"></path><path d="M20 13h-4"></path><path d="M4 13h4"></path></svg> Bug Detection (30 pts)</span>
             <strong>${metrics.bugs ? metrics.bugs.score : 30} / 30</strong>
           </div>
           <div class="metric-progress-bg">
@@ -409,7 +460,7 @@
 
         <div class="metric-card">
           <div class="metric-title-row">
-            <span>⚡ Code Quality (20 pts)</span>
+            <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#38bdf8" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Code Quality (20 pts)</span>
             <strong>${metrics.quality ? metrics.quality.score : 20} / 20</strong>
           </div>
           <div class="metric-progress-bg">
@@ -419,7 +470,7 @@
 
         <div class="metric-card">
           <div class="metric-title-row">
-            <span>🛠️ Maintainability (10 pts)</span>
+            <span><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#10b981" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg> Maintainability (10 pts)</span>
             <strong>${metrics.maintainability ? metrics.maintainability.score : 10} / 10</strong>
           </div>
           <div class="metric-progress-bg">
@@ -443,7 +494,7 @@
       <div class="issues-list-wrapper">
         ${issuesCardsHtml.length > 0 ? issuesCardsHtml : `
           <div class="empty-state">
-            <div class="empty-icon">🎉</div>
+            <div class="empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
             <h4>No Issues Found in Filter!</h4>
             <p>Your code looks great under this category.</p>
           </div>
@@ -465,10 +516,10 @@
         const fixCode = decodeURIComponent(e.currentTarget.getAttribute('data-fix') || '');
         if (navigator.clipboard) {
           navigator.clipboard.writeText(fixCode).then(() => {
-            const originalText = e.currentTarget.textContent;
-            e.currentTarget.textContent = 'Copied!';
+            const originalHtml = e.currentTarget.innerHTML;
+            e.currentTarget.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
             setTimeout(() => {
-              e.currentTarget.textContent = originalText;
+              e.currentTarget.innerHTML = originalHtml;
             }, 1500);
           });
         }
@@ -521,10 +572,10 @@
     if (!currentReview) {
       elements.reportsPreviewContainer.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">📊</div>
+          <div class="empty-icon"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
           <h4>No Active Report</h4>
           <p>Run a code scan first to generate and preview audit reports.</p>
-          <button class="btn btn-primary btn-sm" onclick="window.App.switchTab('analyzer')">Go to Analyzer</button>
+          <button class="btn btn-primary btn-sm" onclick="window.App.startNewAnalysis()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Go to Analyzer</button>
         </div>
       `;
       return;
@@ -533,11 +584,11 @@
     elements.reportsPreviewContainer.innerHTML = `
       <div class="card">
         <div class="card-header">
-          <h3>Report Summary: ${escapeHtml(currentReview.filename)}</h3>
+          <h3><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#38bdf8" stroke-width="2" style="vertical-align: -2px; margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> Report Summary: ${escapeHtml(currentReview.filename)}</h3>
           <div style="display: flex; gap: 8px;">
-            <button class="btn btn-primary btn-sm" id="rep-download-html">Download HTML Report</button>
-            <button class="btn btn-secondary btn-sm" id="rep-download-json">Export JSON</button>
-            <button class="btn btn-outline btn-sm" id="rep-print">Print / PDF</button>
+            <button class="btn btn-primary btn-sm" id="rep-download-html"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> HTML Report</button>
+            <button class="btn btn-secondary btn-sm" id="rep-download-json"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Export JSON</button>
+            <button class="btn btn-outline btn-sm" id="rep-print"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect width="12" height="8" x="6" y="14"></rect></svg> Print / PDF</button>
           </div>
         </div>
         <div class="card-body">
@@ -579,6 +630,7 @@
   window.App = {
     init,
     switchTab,
+    startNewAnalysis,
     loadPresetAndAnalyze,
     runAnalysis
   };

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CodeLens AI — Intelligent Code Analysis & Security Review Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
 </head>
@@ -12,21 +13,21 @@
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-brand">
-      <div class="brand-logo">CL</div>
+      <div class="brand-logo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></div>
       <div class="brand-text">CodeLens AI <span class="brand-badge">Phase 1</span></div>
     </div>
 
     <nav>
       <ul class="nav-menu">
-        <li><button class="nav-link active" data-tab="dashboard">📊 Dashboard</button></li>
-        <li><button class="nav-link" data-tab="analyzer">⚡ Code Analyzer</button></li>
-        <li><button class="nav-link" data-tab="results">🎯 Review Results</button></li>
-        <li><button class="nav-link" data-tab="reports">📄 Reports</button></li>
+        <li><button class="nav-link active" data-tab="dashboard"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg> Dashboard</button></li>
+        <li><button class="nav-link" data-tab="analyzer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg> Code Analyzer</button></li>
+        <li><button class="nav-link" data-tab="results"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg> Review Results</button></li>
+        <li><button class="nav-link" data-tab="reports"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> Reports</button></li>
       </ul>
     </nav>
 
     <div class="nav-status">
-      <span class="security-badge" title="Real-time Secret Redaction & Input Sanitization active">🛡️ Shield Active</span>
+      <span class="security-badge" title="Real-time Secret Redaction & Input Sanitization active"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Shield Active</span>
       <span class="status-dot" id="backend-status-dot"></span>
       <span id="backend-status-text">Checking Engine...</span>
     </div>
@@ -50,7 +51,7 @@
           <div class="drop-zone" id="code-drop-zone">
             <input type="file" id="code-file-input" style="display: none;" accept=".js,.jsx,.ts,.tsx,.py,.html,.css,.java,.c,.cpp,.json">
             <div class="drop-zone-text">
-              📁 <strong>Click to upload</strong> or drag &amp; drop source code file here (.js, .py, .html, .css, .ts)
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M12 12v9"></path><path d="m16 16-4-4-4 4"></path></svg> <strong>Click to upload</strong> or drag &amp; drop source code file here (.js, .py, .html, .css, .ts)
             </div>
           </div>
 
@@ -59,6 +60,7 @@
             <div class="toolbar-group">
               <label for="language-select" class="text-sm text-muted">Language:</label>
               <select id="language-select" class="select-input">
+                <option value="auto" selected>Auto-Detect Language</option>
                 <option value="JavaScript">JavaScript</option>
                 <option value="TypeScript">TypeScript</option>
                 <option value="Python">Python</option>
@@ -69,8 +71,12 @@
                 <option value="JSON">JSON</option>
               </select>
 
+              <span id="detected-lang-badge" class="detected-badge">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg> <span id="detected-lang-name">Auto (Plain Text)</span>
+              </span>
+
               <span class="text-sm text-dim">|</span>
-              <span class="text-sm text-muted">File: <strong id="active-file-name" style="color: #38bdf8;">sample-vulnerable.js</strong></span>
+              <span class="text-sm text-muted">File: <strong id="active-file-name" style="color: #38bdf8;">untitled.js</strong></span>
             </div>
 
             <div class="toolbar-group">
@@ -78,21 +84,21 @@
               <button class="btn btn-outline btn-sm" id="btn-sample-vulnerable" title="Vulnerable JavaScript with eval, XSS & secrets">Insecure JS</button>
               <button class="btn btn-outline btn-sm" id="btn-sample-buggy" title="Python with logic bugs">Buggy Python</button>
               <button class="btn btn-outline btn-sm" id="btn-sample-clean" title="Clean modular JS code">Clean JS</button>
-              <button class="btn btn-secondary btn-sm" id="btn-clear-code">Clear</button>
-              <button class="btn btn-primary btn-sm" id="btn-run-scan">⚡ Run Full Review</button>
+              <button class="btn btn-secondary btn-sm" id="btn-clear-code" title="Clear Workspace"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Clear</button>
+              <button class="btn btn-primary btn-sm" id="btn-run-scan"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run Review</button>
             </div>
           </div>
 
           <!-- Code Editor Body -->
           <div class="editor-container">
             <div class="line-numbers" id="editor-line-numbers"></div>
-            <textarea id="code-editor-textarea" class="code-textarea" placeholder="// Paste source code here or drag and drop a file..." spellcheck="false"></textarea>
+            <textarea id="code-editor-textarea" class="code-textarea" placeholder="// Paste or type your source code here... Language is auto-detected in real-time." spellcheck="false"></textarea>
           </div>
 
           <!-- Editor Footer Stats -->
           <div class="editor-footer">
-            <div id="editor-stats">Lines: 0 &bull; Chars: 0 &bull; Words: 0</div>
-            <div>Static Analysis: Security (40) + Bugs (30) + Quality (20) + Maintainability (10)</div>
+            <div id="editor-stats"><i class="fa-solid fa-align-left"></i> Lines: 0 &bull; Chars: 0 &bull; Words: 0</div>
+            <div><i class="fa-solid fa-shield-halved"></i> Security (40) + <i class="fa-solid fa-bug"></i> Bugs (30) + <i class="fa-solid fa-bolt"></i> Quality (20) + <i class="fa-solid fa-wrench"></i> Maintainability (10)</div>
           </div>
         </div>
       </div>
@@ -102,10 +108,10 @@
     <section class="tab-pane" id="tab-results">
       <div id="results-view-container">
         <div class="empty-state">
-          <div class="empty-icon">🔍</div>
+          <div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
           <h4>No Code Reviewed Yet</h4>
-          <p>Go to the Code Analyzer tab and click "Run Full Review" to inspect findings here.</p>
-          <button class="btn btn-primary btn-sm" onclick="window.App.switchTab('analyzer')">Open Analyzer</button>
+          <p>Go to the Code Analyzer tab and click "Run Review" to inspect findings here.</p>
+          <button class="btn btn-primary btn-sm" onclick="window.App.switchTab('analyzer')"><i class="fa-solid fa-code"></i> Open Analyzer</button>
         </div>
       </div>
     </section>
@@ -124,7 +130,7 @@
     <div class="scan-box">
       <div class="spinner"></div>
       <div class="scan-progress-text" id="scan-step-text">Initializing CodeLens Engine...</div>
-      <div class="scan-step-indicator">AST Pattern Parsing &bull; Zero Remote Execution</div>
+      <div class="scan-step-indicator"><i class="fa-solid fa-shield-halved"></i> AST Pattern Parsing &bull; Zero Remote Execution</div>
     </div>
   </div>
 
@@ -138,6 +144,7 @@
   </footer>
 
   <!-- Scripts Loading (Pure Vanilla JS, Zero External Libraries) -->
+  <script src="js/icons.js"></script>
   <script src="js/engine/securityLayer.js"></script>
   <script src="js/engine/languageDetector.js"></script>
   <script src="js/engine/bugDetector.js"></script>

@@ -143,69 +143,133 @@ No backend server is required for the initial version.
 ```text
 CodeLens-AI/
 │
-├── index.html
+├── index.html                     # Main unified application dashboard & UI
+├── server.js                      # Native Node.js HTTP server (Zero npm dependencies)
+├── package.json                   # Project metadata and run scripts
 │
-├── pages/
+├── pages/                         # Standalone modular page views
 │   ├── dashboard.html
 │   ├── analyzer.html
 │   ├── results.html
 │   └── reports.html
 │
 ├── css/
-│   └── style.css
+│   └── style.css                  # Modern dark developer theme & responsive styles
 │
 ├── assets/
 │   └── images/
 │
 ├── js/
-│   ├── app.js
-│   ├── dashboard.js
-│   ├── editor.js
-│   ├── fileManager.js
+│   ├── app.js                     # Main application controller & tab navigation
+│   ├── dashboard.js               # Dashboard statistics & recent audits table
+│   ├── editor.js                  # Line numbers, syntax helpers & code presets
+│   ├── fileManager.js             # Drag-and-drop file upload & File API reader
 │   │
 │   ├── engine/
-│   │   ├── analyzer.js
-│   │   ├── languageDetector.js
-│   │   ├── bugDetector.js
-│   │   ├── securityScanner.js
-│   │   ├── qualityChecker.js
-│   │   ├── scoringEngine.js
-│   │   └── suggestionEngine.js
+│   │   ├── analyzer.js            # Master analysis coordinator (Browser & Node.js)
+│   │   ├── languageDetector.js    # Automatic language detection heuristics
+│   │   ├── bugDetector.js         # Logic bugs, unhandled exceptions & dead code
+│   │   ├── securityScanner.js     # Vulnerabilities, injection & insecure APIs
+│   │   ├── securityLayer.js       # Live secret redaction, input sanitization & shield
+│   │   ├── qualityChecker.js      # Nesting depth, function length & code hygiene
+│   │   ├── scoringEngine.js       # 100-point score & grade calculator
+│   │   └── suggestionEngine.js    # Remediation recommendations & code diffs
 │   │
 │   ├── reports/
-│   │   └── reportGenerator.js
+│   │   └── reportGenerator.js     # Standalone HTML report, JSON & Print-to-PDF
 │   │
 │   └── storage/
-│       └── history.js
+│       └── history.js             # LocalStorage & backend history sync
+│
+├── scripts/
+│   └── security-check.js          # Pre-push security auditor (zero leak validator)
+│
+├── samples/                       # Test files for quick analysis
+│   ├── vulnerable-javascript.js   # Insecure JS sample (eval, XSS, loose equality)
+│   ├── buggy-python.py            # Python sample (logic flaws, naming issues)
+│   └── clean-javascript.js        # Production-grade clean code sample (Grade A+)
+│
+├── data/
+│   └── history.json               # Backend review history persistence
 │
 └── README.md
 ```
 
-## Getting Started
+---
+
+## 🚀 How to Run CodeLens AI
+
+CodeLens AI is built with pure **HTML5, CSS3, and Vanilla JavaScript** with zero mandatory external package installations. You can run it either using the **Native Node.js Server** or directly in your **Web Browser**.
 
 ### Prerequisites
 
-- Modern web browser (Chrome, Firefox, Edge, etc.).
-- Code editor such as Visual Studio Code.
-- Basic understanding of HTML, CSS, and JavaScript.
+- Modern Web Browser (Google Chrome, Microsoft Edge, Mozilla Firefox, Brave, Safari).
+- *(Optional)* [Node.js](https://nodejs.org/) (v16 or higher) if running the backend server.
 
-### Installation
+---
 
-**1. Clone the repository**
+### Method 1: Using the Native Node.js Server (Recommended)
 
-**2. Navigate to the project directory**
+Running the native backend provides static file hosting, REST API endpoints (`/api/analyze`, `/api/health`, `/api/history`), HTTP security headers, and file-based audit persistence.
 
+**1. Clone the repository:**
 ```bash
-cd CodeLens-AI
+git clone https://github.com/vrinda8331-prog/ai-code-review-system-project.git
+cd ai-code-review-system-project
 ```
 
-**3. Open the project**
+**2. Start the server (No `npm install` needed!):**
+```bash
+node server.js
+```
+*Alternatively, if npm is configured:*
+```bash
+npm start
+```
 
-Open `index.html` directly in your browser.
+**3. Open in your browser:**
+Navigate to:
+```text
+http://localhost:3000
+```
 
-Alternatively, use the VS Code Live Server extension for local development.
+> **Note:** The server uses Node's built-in `http`, `fs`, and `path` modules — no external npm dependencies required!
 
-No package installation or backend configuration is required for Phase 1.
+---
+
+### Method 2: Pure Frontend / Direct Browser (No Server Required)
+
+If you don't have Node.js installed or prefer a serverless client-side experience:
+
+1. Clone or download the repository.
+2. Double-click **`index.html`** or open it directly in any web browser.
+3. *VS Code Users:* Right-click `index.html` and choose **"Open with Live Server"**.
+
+The application automatically falls back to the in-browser client-side static analysis engine and saves review history in `localStorage`.
+
+---
+
+### 🛡️ Running the Pre-Push Security Audit
+
+To ensure no sensitive secrets or credentials are leaked before pushing to GitHub (GitHub Push Protection compliant):
+
+```bash
+node scripts/security-check.js
+```
+
+This scans all tracked source files and reports any unmasked credentials or token patterns.
+
+---
+
+### 🧪 Testing with Sample Code
+
+You can test the platform instantly using the built-in preset buttons in the editor, or by uploading files from the `samples/` directory:
+
+| Sample File | Language | Purpose | Expected Score |
+|---|---|---|:---:|
+| `samples/vulnerable-javascript.js` | JavaScript | Tests detection of `eval()`, DOM XSS, unreachable code, loose equality | ~45/100 (Grade D) |
+| `samples/buggy-python.py` | Python | Tests Python language detection, self-assignment, cryptic naming | ~73/100 (Grade B) |
+| `samples/clean-javascript.js` | JavaScript | Tests clean, production-ready code with input sanitization | 100/100 (Grade A+) |
 
 ---
 
@@ -213,15 +277,15 @@ No package installation or backend configuration is required for Phase 1.
 
 | Phase | Development Focus | Status |
 |---|---|---|
-| 01 | Dashboard, sidebar and responsive UI | Planned |
-| 02 | Code editor, file uploads and language detection | Planned |
-| 03 | Bug detection engine | Planned |
-| 04 | Security scanning engine | Planned |
-| 05 | Code quality and maintainability analysis | Planned |
-| 06 | Scoring and fix suggestions | Planned |
-| 07 | Review history and report generation | Planned |
-| 08 | Testing, optimization and deployment | Planned |
-| 09 | Optional AI-powered analysis integration | Future |
+| 01 | Dashboard, sidebar and responsive UI | ✅ Completed |
+| 02 | Code editor, file uploads and language detection | ✅ Completed |
+| 03 | Bug detection engine | ✅ Completed |
+| 04 | Security scanning engine & security layer | ✅ Completed |
+| 05 | Code quality and maintainability analysis | ✅ Completed |
+| 06 | Scoring and fix suggestions | ✅ Completed |
+| 07 | Review history and report generation | ✅ Completed |
+| 08 | Testing, optimization and deployment | 🔄 Active |
+| 09 | Optional AI-powered analysis integration | 🔮 Future |
 
 
 ##  Future Enhancements

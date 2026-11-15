@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "scan-1794776219463-410",
+    "timestamp": "2026-11-15T20:56:59.463Z",
+    "filename": "sample-vulnerable.js",
+    "language": "Python",
+    "linesOfCode": 41,
+    "score": 82,
+    "grade": "A",
+    "gradeColor": "#34d399",
+    "totalIssues": 3,
+    "severityCounts": {
+      "Critical": 0,
+      "High": 0,
+      "Medium": 3,
+      "Low": 0,
+      "Info": 0
+    },
+    "issues": [
+      {
+        "id": "BUG-UNREACHABLE-11",
+        "title": "Unreachable Code Detected",
+        "category": "Bug Detection",
+        "severity": "Medium",
+        "line": 11,
+        "snippet": "def find_max(numbers):",
+        "explanation": "This statement appears immediately after a return or throw statement in the same scope and will never be executed.",
+        "fix": "// Remove or relocate unreachable code before return/throw",
+        "icon": "🔔",
+        "tagClass": "tag-medium",
+        "remediation": "// Remove or relocate unreachable code before return/throw"
+      },
+      {
+        "id": "BUG-UNREACHABLE-21",
+        "title": "Unreachable Code Detected",
+        "category": "Bug Detection",
+        "severity": "Medium",
+        "line": 21,
+        "snippet": "def get_user_details(user):",
+        "explanation": "This statement appears immediately after a return or throw statement in the same scope and will never be executed.",
+        "fix": "// Remove or relocate unreachable code before return/throw",
+        "icon": "🔔",
+        "tagClass": "tag-medium",
+        "remediation": "// Remove or relocate unreachable code before return/throw"
+      },
+      {
+        "id": "BUG-UNREACHABLE-29",
+        "title": "Unreachable Code Detected",
+        "category": "Bug Detection",
+        "severity": "Medium",
+        "line": 29,
+        "snippet": "\"name\": name,",
+        "explanation": "This statement appears immediately after a return or throw statement in the same scope and will never be executed.",
+        "fix": "// Remove or relocate unreachable code before return/throw",
+        "icon": "🔔",
+        "tagClass": "tag-medium",
+        "remediation": "// Remove or relocate unreachable code before return/throw"
+      }
+    ],
+    "codeSnippet": "def calculate_average(numbers):\n    total = 0\n\n    for i in range(len(numbers)):\n        total += numbers[i]\n\n    average = total / len(numbers) - 1\n    return average\n\n\ndef find_max(numbers):\n    max_value = 0\n\n    for num in numbers:\n        if num < max_value:\n            max_value = num\n\n    return max_value\n\n\ndef get_user_details(user):\n    name = user[\"name\"]\n    age = user[\"age\"]\n\n    if age >= 18:\n        status = \"Adult\"\n\n    return {\n        \"name\": name,\n        \"age\": age,\n        \"s"
+  }
+]

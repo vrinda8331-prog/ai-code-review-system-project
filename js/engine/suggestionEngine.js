@@ -13,23 +13,23 @@
 
   function enhanceIssues(issues = []) {
     return issues.map((issue) => {
-      let icon = '⚡';
+      let icon = '<i class="fa-solid fa-circle-info"></i>';
       let tagClass = 'tag-medium';
 
       if (issue.severity === 'Critical') {
-        icon = '🚨';
+        icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
         tagClass = 'tag-critical';
       } else if (issue.severity === 'High') {
-        icon = '⚠️';
+        icon = '<i class="fa-solid fa-circle-exclamation"></i>';
         tagClass = 'tag-high';
       } else if (issue.severity === 'Medium') {
-        icon = '🔔';
+        icon = '<i class="fa-solid fa-bell"></i>';
         tagClass = 'tag-medium';
       } else if (issue.severity === 'Low') {
-        icon = '💡';
+        icon = '<i class="fa-solid fa-lightbulb"></i>';
         tagClass = 'tag-low';
       } else {
-        icon = 'ℹ️';
+        icon = '<i class="fa-solid fa-circle-info"></i>';
         tagClass = 'tag-info';
       }
 

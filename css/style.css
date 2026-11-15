@@ -145,6 +145,20 @@ body {
   box-shadow: 0 2px 10px var(--primary-glow);
 }
 
+.detected-badge {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
 .security-badge {
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.4);
@@ -223,7 +237,7 @@ body {
 }
 
 .stat-icon {
-  font-size: 2rem;
+  font-size: 1.5rem;
   width: 50px;
   height: 50px;
   border-radius: var(--radius-sm);
@@ -231,6 +245,31 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.stat-icon svg {
+  width: 26px;
+  height: 26px;
+  stroke: currentColor;
+}
+
+.icon-svg-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.125em;
+  line-height: 1;
+}
+
+.icon-svg-wrapper svg {
+  width: 1em;
+  height: 1em;
+  stroke: currentColor;
+}
+
+.btn svg, .nav-link svg {
+  margin-right: 6px;
+  vertical-align: -0.15em;
 }
 
 .stat-info {
