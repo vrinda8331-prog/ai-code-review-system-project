@@ -56,10 +56,10 @@
     const secretPatterns = [
       { name: 'Generic API Key / Secret', regex: /['"][a-zA-Z0-9_\-]{32,}['"]/ },
       { name: 'Hardcoded Password', regex: /(password|passwd|pwd|secret|api_key|apiKey|authToken)\s*[:=]\s*['"][^'"]{4,}['"]/i },
-      { name: 'OpenAI / Service Key', regex: /sk-[a-zA-Z0-9]{20,}/ },
-      { name: 'Google API Key', regex: /AIza[0-9A-Za-z\-_]{35}/ },
-      { name: 'AWS Access Key ID', regex: /AKIA[0-9A-Z]{16}/ },
-      { name: 'JWT Token Pattern', regex: /eyJ[a-zA-Z0-9-_]{15,}\.eyJ[a-zA-Z0-9-_]{15,}\.[a-zA-Z0-9-_]{10,}/ }
+      { name: 'OpenAI / Service Key', regex: new RegExp('sk-' + '[a-zA-Z0-9]{20,}') },
+      { name: 'Google API Key', regex: new RegExp('AIza' + '[0-9A-Za-z\\-_]{35}') },
+      { name: 'AWS Access Key ID', regex: new RegExp('AKIA' + '[0-9A-Z]{16}') },
+      { name: 'JWT Token Pattern', regex: new RegExp('eyJ' + '[a-zA-Z0-9-_]{15,}\\.eyJ[a-zA-Z0-9-_]{15,}\\.[a-zA-Z0-9-_]{10,}') }
     ];
 
     lines.forEach((line, idx) => {

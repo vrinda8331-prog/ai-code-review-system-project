@@ -201,3 +201,4 @@
 
   return { render: renderDashboard };
 });
+

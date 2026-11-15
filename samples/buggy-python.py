@@ -1,7 +1,7 @@
 # Buggy Python Sample
 # Used for testing CodeLens AI language detection and pattern scanner
 
-API_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.doNotHardcodeThisToken"
+API_TOKEN = "mock_api_token_jwt_placeholder_secret_key_123456"
 
 def calculate_order_total(items, discount_code):
     # Poor single letter naming & magic numbers

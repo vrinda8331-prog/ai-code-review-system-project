@@ -9,11 +9,13 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-// Load Server-Side Static Analysis Engine
+// Load Server-Side Static Analysis Engine & Security Layer
 const Analyzer = require('./js/engine/analyzer');
+const SecurityLayer = require('./js/engine/securityLayer');
 
 const PORT = process.env.PORT || 3000;
 const HISTORY_FILE = path.join(__dirname, 'data', 'history.json');
+const MAX_PAYLOAD_SIZE = 2 * 1024 * 1024; // 2MB Security Limit
 
 // Ensure data directory and history file exist
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
@@ -21,6 +23,19 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
 }
 if (!fs.existsSync(HISTORY_FILE)) {
   fs.writeFileSync(HISTORY_FILE, JSON.stringify([]), 'utf8');
+}
+
+// Security Headers Middleware
+function applySecurityHeaders(res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';"
+  );
 }
 
 // MIME Types Map
@@ -37,8 +52,9 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-// Helper to send JSON responses
+// Helper to send JSON responses with security headers
 function sendJSON(res, statusCode, data) {
+  applySecurityHeaders(res);
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
@@ -48,15 +64,14 @@ function sendJSON(res, statusCode, data) {
   res.end(JSON.stringify(data, null, 2));
 }
 
-// Helper to parse JSON body
+// Helper to parse and sanitize JSON body
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
-      // 10MB safety limit
-      if (body.length > 10 * 1024 * 1024) {
-        reject(new Error('Request payload too large'));
+      if (body.length > MAX_PAYLOAD_SIZE) {
+        reject(new Error('Payload too large (Security Limit: 2MB)'));
       }
     });
     req.on('end', () => {
@@ -187,6 +202,7 @@ const server = http.createServer(async (req, res) => {
         return res.end('500 Internal Server Error');
       }
 
+      applySecurityHeaders(res);
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(content);
     });

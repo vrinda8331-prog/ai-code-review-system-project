@@ -4,8 +4,8 @@
  */
 
 // 1. Critical: Hardcoded Secret
-const AWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE";
-const STRIPE_SECRET_KEY = "sk_live_51Abcdef1234567890abcdef123456";
+const AWS_ACCESS_KEY = "mock_aws_access_key_placeholder_12345";
+const STRIPE_SECRET_KEY = "mock_stripe_secret_key_dummy_token_12345";
 
 // 2. Insecure PRNG
 function generateSessionToken() {

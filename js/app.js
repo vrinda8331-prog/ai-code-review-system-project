@@ -242,6 +242,21 @@
 
     const selectedLang = elements.langSelect ? elements.langSelect.value : 'JavaScript';
 
+    // 0. Security Layer Pre-Check & Sanitization
+    let cleanCode = code;
+    if (window.SecurityLayer) {
+      try {
+        const sanitized = window.SecurityLayer.sanitizeInput(code);
+        cleanCode = sanitized.cleanedCode;
+        if (sanitized.leaksDetected && sanitized.leaksDetected.length > 0) {
+          console.warn('SecurityLayer: Real secrets detected in code input:', sanitized.leaksDetected);
+        }
+      } catch (secErr) {
+        alert('Security Layer Block: ' + secErr.message);
+        return;
+      }
+    }
+
     // Show animation overlay
     showScanProgress(true);
     updateScanStep('Detecting programming language & structure...');

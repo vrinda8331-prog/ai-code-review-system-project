@@ -29,3 +29,4 @@ function renderSafeGreeting(userName, parentContainer) {
   parentContainer.appendChild(greetingElement);
   return greetingElement;
 }
+

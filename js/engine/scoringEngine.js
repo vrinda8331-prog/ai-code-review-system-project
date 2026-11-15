@@ -114,3 +114,4 @@
 
   return { calculateScore, WEIGHTS, PENALTIES };
 });
+

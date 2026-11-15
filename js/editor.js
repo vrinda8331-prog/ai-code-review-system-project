@@ -13,7 +13,7 @@
 
   const SAMPLE_CODES = {
     vulnerable_js: `// CodeLens AI Sample: Insecure & Buggy JavaScript
-const apiKey = "sk-live-93821048201948201948201948";
+const apiKey = "MOCK_API_KEY_EXAMPLE_FOR_TESTING_PURPOSES";
 let userSessionToken = Math.random().toString(36).substring(2);
 
 function processUserData(userInput, userRole) {
@@ -49,7 +49,7 @@ localStorage.setItem("authToken", apiKey);
     buggy_python: `# CodeLens AI Sample: Buggy Python Script
 import os
 
-API_SECRET = "sk_live_abcdef1234567890abcdef1234567890"
+API_SECRET = "mock_secret_key_auth_token_for_testing_only"
 
 def calculate_discount(price, user_type):
     # Poor naming & magic numbers
