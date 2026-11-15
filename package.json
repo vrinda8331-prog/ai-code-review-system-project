@@ -1,0 +1,11 @@
+{
+  "name": "codelens-ai",
+  "version": "1.0.0",
+  "description": "CodeLens AI - Pure HTML, CSS and Vanilla JS Code Review Platform",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["html", "css", "javascript", "code-review", "static-analysis"],
+  "author": "Ayush Gorlawar & vrinda8331",
+  "license": "MIT"
+}
