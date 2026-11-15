@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeLens AI — Intelligent Code Analysis & Security Review Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-logo">CL</div>
+      <div class="brand-text">CodeLens AI <span class="brand-badge">Phase 1</span></div>
+    </div>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><button class="nav-link active" data-tab="dashboard">📊 Dashboard</button></li>
+        <li><button class="nav-link" data-tab="analyzer">⚡ Code Analyzer</button></li>
+        <li><button class="nav-link" data-tab="results">🎯 Review Results</button></li>
+        <li><button class="nav-link" data-tab="reports">📄 Reports</button></li>
+      </ul>
+    </nav>
+
+    <div class="nav-status">
+      <span class="status-dot" id="backend-status-dot"></span>
+      <span id="backend-status-text">Checking Engine...</span>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="container">
+    
+    <!-- 1. DASHBOARD TAB -->
+    <section class="tab-pane active" id="tab-dashboard">
+      <div id="dashboard-view-container">
+        <!-- Rendered dynamically by js/dashboard.js -->
+      </div>
+    </section>
+
+    <!-- 2. ANALYZER TAB -->
+    <section class="tab-pane" id="tab-analyzer">
+      <div class="card" style="margin-bottom: 1rem;">
+        <div class="card-body" style="padding: 1rem;">
+          <!-- Drop Zone -->
+          <div class="drop-zone" id="code-drop-zone">
+            <input type="file" id="code-file-input" style="display: none;" accept=".js,.jsx,.ts,.tsx,.py,.html,.css,.java,.c,.cpp,.json">
+            <div class="drop-zone-text">
+              📁 <strong>Click to upload</strong> or drag &amp; drop source code file here (.js, .py, .html, .css, .ts)
+            </div>
+          </div>
+
+          <!-- Editor Toolbar -->
+          <div class="analyzer-toolbar">
+            <div class="toolbar-group">
+              <label for="language-select" class="text-sm text-muted">Language:</label>
+              <select id="language-select" class="select-input">
+                <option value="JavaScript">JavaScript</option>
+                <option value="TypeScript">TypeScript</option>
+                <option value="Python">Python</option>
+                <option value="HTML">HTML</option>
+                <option value="CSS">CSS</option>
+                <option value="Java">Java</option>
+                <option value="C++">C++</option>
+                <option value="JSON">JSON</option>
+              </select>
+
+              <span class="text-sm text-dim">|</span>
+              <span class="text-sm text-muted">File: <strong id="active-file-name" style="color: #38bdf8;">sample-vulnerable.js</strong></span>
+            </div>
+
+            <div class="toolbar-group">
+              <span class="text-sm text-dim">Presets:</span>
+              <button class="btn btn-outline btn-sm" id="btn-sample-vulnerable" title="Vulnerable JavaScript with eval, XSS & secrets">Insecure JS</button>
+              <button class="btn btn-outline btn-sm" id="btn-sample-buggy" title="Python with logic bugs">Buggy Python</button>
+              <button class="btn btn-outline btn-sm" id="btn-sample-clean" title="Clean modular JS code">Clean JS</button>
+              <button class="btn btn-secondary btn-sm" id="btn-clear-code">Clear</button>
+              <button class="btn btn-primary btn-sm" id="btn-run-scan">⚡ Run Full Review</button>
+            </div>
+          </div>
+
+          <!-- Code Editor Body -->
+          <div class="editor-container">
+            <div class="line-numbers" id="editor-line-numbers"></div>
+            <textarea id="code-editor-textarea" class="code-textarea" placeholder="// Paste source code here or drag and drop a file..." spellcheck="false"></textarea>
+          </div>
+
+          <!-- Editor Footer Stats -->
+          <div class="editor-footer">
+            <div id="editor-stats">Lines: 0 &bull; Chars: 0 &bull; Words: 0</div>
+            <div>Static Analysis: Security (40) + Bugs (30) + Quality (20) + Maintainability (10)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RESULTS TAB -->
+    <section class="tab-pane" id="tab-results">
+      <div id="results-view-container">
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h4>No Code Reviewed Yet</h4>
+          <p>Go to the Code Analyzer tab and click "Run Full Review" to inspect findings here.</p>
+          <button class="btn btn-primary btn-sm" onclick="window.App.switchTab('analyzer')">Open Analyzer</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. REPORTS TAB -->
+    <section class="tab-pane" id="tab-reports">
+      <div id="reports-preview-container">
+        <!-- Rendered dynamically by js/app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Scanning Modal / Progress Indicator -->
+  <div class="scanning-overlay" id="scan-overlay">
+    <div class="scan-box">
+      <div class="spinner"></div>
+      <div class="scan-progress-text" id="scan-step-text">Initializing CodeLens Engine...</div>
+      <div class="scan-step-indicator">AST Pattern Parsing &bull; Zero Remote Execution</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>
+      <strong>CodeLens AI</strong> &mdash; Intelligent Code Analysis &amp; Security Review Platform
+      <br>
+      Created by <strong>Ayush Gorlawar</strong> &amp; <strong>vrinda8331-prog</strong> &bull; Pure HTML, CSS &amp; Vanilla JavaScript
+    </p>
+  </footer>
+
+  <!-- Scripts Loading (Pure Vanilla JS, Zero External Libraries) -->
+  <script src="js/engine/languageDetector.js"></script>
+  <script src="js/engine/bugDetector.js"></script>
+  <script src="js/engine/securityScanner.js"></script>
+  <script src="js/engine/qualityChecker.js"></script>
+  <script src="js/engine/scoringEngine.js"></script>
+  <script src="js/engine/suggestionEngine.js"></script>
+  <script src="js/engine/analyzer.js"></script>
+  <script src="js/storage/history.js"></script>
+  <script src="js/reports/reportGenerator.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/fileManager.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
