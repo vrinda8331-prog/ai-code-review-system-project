@@ -128,11 +128,16 @@
     lines.forEach((line, idx) => {
       const lineNum = idx + 1;
       const trimmed = line.trim();
-      if (trimmed.startsWith('for ') || trimmed.startsWith('for(') || trimmed.startsWith('//')) return;
+      if (
+        trimmed.startsWith('for ') ||
+        trimmed.startsWith('for(') ||
+        trimmed.startsWith('//') ||
+        trimmed.startsWith('#')
+      ) return;
 
-      const crypticMatch = line.match(/\b(let|const|var)\s+([a-hj-km-z])\s*=\s*[^;]+/);
+      const crypticMatch = trimmed.match(/^(?:(?:let|const|var)\s+)?([a-hj-km-z])\s*=\s*[^=;]+/);
       if (crypticMatch) {
-        const varName = crypticMatch[2];
+        const varName = crypticMatch[1];
         issues.push({
           id: `QLT-NAMING-${lineNum}`,
           title: `Cryptic Variable Name '${varName}'`,
@@ -140,8 +145,8 @@
           severity: 'Info',
           line: lineNum,
           snippet: trimmed,
-          explanation: `Single-letter identifier '${varName}' harms code readability. Use descriptive names like 'totalPrice' or 'userData'.`,
-          fix: line.replace(new RegExp(`\\b${varName}\\b`), `${varName}Descriptive`)
+          explanation: `Single-letter identifier '${varName}' reduces code clarity. Use a descriptive name such as 'price', 'totalCount', or 'userData'.`,
+          fix: trimmed.replace(new RegExp(`\\b${varName}\\b`), `${varName}Descriptive`)
         });
       }
     });

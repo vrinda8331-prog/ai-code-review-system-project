@@ -57,22 +57,34 @@
     }
 
     // Rule 3: Unreachable code after return / throw / break
-    let inFunction = false;
     let sawReturn = false;
-    let blockDepth = 0;
+    let returnDepth = -1;
+    let currentDepth = 0;
 
     lines.forEach((line, idx) => {
       const lineNum = idx + 1;
       const trimmed = line.trim();
-      if (trimmed.startsWith('//') || trimmed.startsWith('#')) return;
+      if (trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('/*')) return;
 
-      if (trimmed.includes('{')) blockDepth += (trimmed.match(/\{/g) || []).length;
-      if (trimmed.includes('}')) {
-        blockDepth -= (trimmed.match(/\}/g) || []).length;
-        if (blockDepth <= 1) sawReturn = false;
+      const opens = (trimmed.match(/\{/g) || []).length;
+      const closes = (trimmed.match(/\}/g) || []).length;
+
+      // If we exit the scope where the return happened, reset sawReturn
+      if (sawReturn && returnDepth !== -1 && (currentDepth - closes) < returnDepth) {
+        sawReturn = false;
+        returnDepth = -1;
       }
 
-      if (sawReturn && trimmed.length > 0 && trimmed !== '}' && !trimmed.startsWith('case ') && !trimmed.startsWith('default:')) {
+      // Check if statement is unreachable
+      if (
+        sawReturn &&
+        trimmed.length > 0 &&
+        trimmed !== '}' &&
+        trimmed !== ');' &&
+        !trimmed.startsWith('.') &&
+        !trimmed.startsWith('case ') &&
+        !trimmed.startsWith('default:')
+      ) {
         issues.push({
           id: `BUG-UNREACHABLE-${lineNum}`,
           title: 'Unreachable Code Detected',
@@ -80,48 +92,57 @@
           severity: 'Medium',
           line: lineNum,
           snippet: trimmed,
-          explanation: `This code appears immediately after a return/throw statement inside the same scope and will never execute.`,
-          fix: '// Remove or move unreachable statement before return'
+          explanation: `This statement appears immediately after a return or throw statement in the same scope and will never be executed.`,
+          fix: '// Remove or relocate unreachable code before return/throw'
         });
         sawReturn = false;
+        returnDepth = -1;
       }
 
+      // Check for return / throw / break / continue
       if (/^\s*(return|throw\s+new\s+\w+|break|continue)\b[^;]*;?$/.test(trimmed)) {
         sawReturn = true;
+        returnDepth = currentDepth + opens;
       }
+
+      currentDepth += opens - closes;
+      if (currentDepth < 0) currentDepth = 0;
     });
 
-    // Rule 4: Loose equality checks (== instead of ===)
-    lines.forEach((line, idx) => {
-      const lineNum = idx + 1;
-      const trimmed = line.trim();
-      if (trimmed.startsWith('//') || trimmed.startsWith('/*')) return;
+    // Rule 4: Loose equality checks (== instead of ===) in JavaScript/TypeScript
+    const isJsLike = /JavaScript|TypeScript/i.test(language) || !language;
+    if (isJsLike) {
+      lines.forEach((line, idx) => {
+        const lineNum = idx + 1;
+        const trimmed = line.trim();
+        if (trimmed.startsWith('//') || trimmed.startsWith('/*')) return;
 
-      if (/\s==\s(?!=)/.test(line) && !/typeof\s/.test(line)) {
-        issues.push({
-          id: `BUG-LOOSE-EQ-${lineNum}`,
-          title: 'Loose Equality Operator (==)',
-          category: 'Bug Detection',
-          severity: 'Low',
-          line: lineNum,
-          snippet: trimmed,
-          explanation: 'Using loose equality (==) causes implicit type coercion, leading to unexpected truthy/falsy behavior. Use strict equality (===).',
-          fix: line.replace(/==(?!=)/g, '===')
-        });
-      }
-      if (/\s!=\s(?!=)/.test(line)) {
-        issues.push({
-          id: `BUG-LOOSE-NEQ-${lineNum}`,
-          title: 'Loose Inequality Operator (!=)',
-          category: 'Bug Detection',
-          severity: 'Low',
-          line: lineNum,
-          snippet: trimmed,
-          explanation: 'Using loose inequality (!=) causes unexpected type conversions. Use strict inequality (!==).',
-          fix: line.replace(/!=(?!=)/g, '!==')
-        });
-      }
-    });
+        if (/\s==\s(?!=)/.test(line) && !/typeof\s/.test(line)) {
+          issues.push({
+            id: `BUG-LOOSE-EQ-${lineNum}`,
+            title: 'Loose Equality Operator (==)',
+            category: 'Bug Detection',
+            severity: 'Low',
+            line: lineNum,
+            snippet: trimmed,
+            explanation: 'Using loose equality (==) causes implicit type coercion in JavaScript. Use strict equality (===).',
+            fix: line.replace(/==(?!=)/g, '===')
+          });
+        }
+        if (/\s!=\s(?!=)/.test(line)) {
+          issues.push({
+            id: `BUG-LOOSE-NEQ-${lineNum}`,
+            title: 'Loose Inequality Operator (!=)',
+            category: 'Bug Detection',
+            severity: 'Low',
+            line: lineNum,
+            snippet: trimmed,
+            explanation: 'Using loose inequality (!=) causes unexpected type conversions. Use strict inequality (!==).',
+            fix: line.replace(/!=(?!=)/g, '!==')
+          });
+        }
+      });
+    }
 
     // Rule 5: NaN comparison (x === NaN)
     lines.forEach((line, idx) => {
@@ -172,7 +193,10 @@
     // Rule 7: Self-assignment (x = x)
     lines.forEach((line, idx) => {
       const lineNum = idx + 1;
-      const selfAssign = line.match(/\b([a-zA-Z_$][\w$]*)\s*=\s*\1\s*;/);
+      const trimmed = line.trim();
+      if (trimmed.startsWith('//') || trimmed.startsWith('#')) return;
+
+      const selfAssign = trimmed.match(/^([a-zA-Z_$][\w$]*)\s*=\s*\1\s*(?:;|\s*$)/);
       if (selfAssign) {
         issues.push({
           id: `BUG-SELF-ASSIGN-${lineNum}`,
@@ -180,7 +204,7 @@
           category: 'Bug Detection',
           severity: 'Medium',
           line: lineNum,
-          snippet: line.trim(),
+          snippet: trimmed,
           explanation: `Variable '${selfAssign[1]}' is assigned to itself with no effect.`,
           fix: `// Remove redundant assignment ${selfAssign[0]}`
         });
