@@ -277,7 +277,7 @@ You can test the platform instantly using the built-in preset buttons in the edi
 
 | Phase | Development Focus | Status |
 |---|---|---|
-| 01 | Dashboard, sidebar and responsive UI | ✅ Completed |
+| 01 | Dashboard, sidebar and responsive UI | 🔄 Active|
 | 02 | Code editor, file uploads and language detection | ✅ Completed |
 | 03 | Bug detection engine | ✅ Completed |
 | 04 | Security scanning engine & security layer | ✅ Completed |
